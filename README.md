@@ -7,7 +7,30 @@
 [![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![OS](https://img.shields.io/badge/Ubuntu-22.04_LTS-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://releases.ubuntu.com/22.04/)
 
-A comprehensive, end-to-end **ROS 2 Humble** and **Ignition Gazebo Fortress** robotics simulation featuring a 2-wheel differential-drive mobile robot equipped with **2D LiDAR** and **IMU**. The robot performs real-time simultaneous localization and mapping (SLAM) using **SLAM Toolbox**, saves high-resolution occupancy grid maps, and navigates autonomously in complex indoor environments using the **Nav2** stack.
+A comprehensive, end-to-end **ROS 2 Humble** and **Ignition Gazebo Fortress** robotics project featuring a 2-wheel differential-drive mobile robot equipped with **2D LiDAR** and **IMU**. The robot performs real-time simultaneous localization and mapping (SLAM) using **SLAM Toolbox**, saves high-resolution occupancy grid maps, and navigates autonomously in complex indoor environments using the **Nav2** stack.
+
+---
+
+## 📸 Visual Demos & Simulation Previews
+
+### 🎥 Autonomous Navigation Demo (Live Action)
+![Autonomous Navigation Demo](docs/images/navigation_demo.gif)
+> 📹 *Nav2 stack planning dynamic paths, avoiding obstacles, and driving to designated goal poses.*  
+> *(Full resolution video available at [`docs/videos/navigation_demo.webm`](docs/videos/navigation_demo.webm))*
+
+---
+
+### 🖼️ Simulation & Visualization
+
+| 🌐 Ignition Gazebo Fortress Simulation | 🗺️ Live SLAM Mapping in RViz2 |
+| :---: | :---: |
+| ![Gazebo Simulation](docs/images/gazebo_simulation.png) | ![SLAM Map Making](docs/images/slam_map_making.png) |
+| *Physics environment with 10x8m room & obstacles* | *SLAM Toolbox online async real-time mapping* |
+
+| 🧭 Nav2 Global & Local Costmaps (RViz2) | 📄 Generated 2D Occupancy Grid Map |
+| :---: | :---: |
+| ![RViz Navigation](docs/images/rviz_visualization.png) | ![Occupancy Map](docs/images/slam_map.png) |
+| *AMCL localization, costmaps & DWB local planner* | *Final 0.05m/pixel resolution saved map* |
 
 ---
 
@@ -76,8 +99,14 @@ slam_ws/
 ├── save_map.sh            # 💾 1-Click: Save occupancy map (.yaml, .pgm, .png)
 ├── kill_all.sh            # 🛑 1-Click: Safe shutdown and DDS cleanup
 ├── docs/
-│   └── images/
-│       └── slam_map.png   # Generated 2D occupancy grid map
+│   ├── images/
+│   │   ├── gazebo_simulation.png  # Gazebo fortress world preview
+│   │   ├── rviz_visualization.png # RViz2 costmaps and AMCL visualization
+│   │   ├── slam_map_making.png    # Live SLAM mapping preview
+│   │   ├── navigation_demo.gif    # Animated navigation showcase
+│   │   └── slam_map.png           # 2D occupancy grid map
+│   └── videos/
+│       └── navigation_demo.webm   # HD navigation screen recording
 ├── tools/                 # Diagnostic, alignment, and testing scripts
 └── src/
     └── slam_robot/
@@ -216,17 +245,6 @@ ros2 launch slam_robot nav.launch.py
 ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
   "{pose: {header: {frame_id: map}, pose: {position: {x: 2.5, y: 1.2}, orientation: {w: 1.0}}}}"
 ```
-
----
-
-## 🗺️ Generated SLAM Map Result
-
-Below is the 2D occupancy grid map mapped and saved by the SLAM robot in the 10x8 m obstacle room:
-
-<div align="center">
-  <img src="docs/images/slam_map.png" alt="2D SLAM Occupancy Grid Map" width="500"/>
-  <p><i>Generated via SLAM Toolbox (Resolution: 0.05m/pixel, Origin: [-5.6, -4.6, 0])</i></p>
-</div>
 
 ---
 
