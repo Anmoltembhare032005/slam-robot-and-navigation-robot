@@ -1,0 +1,355 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <world name="slam_room">
+
+    <!-- Physics Engine Configuration -->
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <!-- Essential Ignition Gazebo Plugins -->
+    <plugin filename="ignition-gazebo-physics-system" name="ignition::gazebo::systems::Physics"></plugin>
+    <plugin filename="ignition-gazebo-imu-system" name="ignition::gazebo::systems::Imu"></plugin>
+    <plugin filename="ignition-gazebo-user-commands-system" name="ignition::gazebo::systems::UserCommands"></plugin>
+    <plugin filename="ignition-gazebo-scene-broadcaster-system" name="ignition::gazebo::systems::SceneBroadcaster"></plugin>
+    <plugin filename="ignition-gazebo-sensors-system" name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- ================= Lighting ================= -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.85 0.85 0.85 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.4 0.2 -0.9</direction>
+    </light>
+
+    <!-- Ambient Room Point Lights for clear mapping visibility -->
+    <light type="point" name="lamp_center">
+      <pose>0 0 3.5 0 0 0</pose>
+      <diffuse>0.6 0.6 0.6 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation><range>15</range><constant>0.6</constant></attenuation>
+    </light>
+    <light type="point" name="lamp_top_left">
+      <pose>-3.0 3.0 3.5 0 0 0</pose>
+      <diffuse>0.4 0.4 0.4 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation><range>10</range><constant>0.7</constant></attenuation>
+    </light>
+    <light type="point" name="lamp_top_right">
+      <pose>3.0 3.0 3.5 0 0 0</pose>
+      <diffuse>0.4 0.4 0.4 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation><range>10</range><constant>0.7</constant></attenuation>
+    </light>
+    <light type="point" name="lamp_bottom_left">
+      <pose>-3.0 -3.0 3.5 0 0 0</pose>
+      <diffuse>0.4 0.4 0.4 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation><range>10</range><constant>0.7</constant></attenuation>
+    </light>
+    <light type="point" name="lamp_bottom_right">
+      <pose>3.0 -3.0 3.5 0 0 0</pose>
+      <diffuse>0.4 0.4 0.4 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <attenuation><range>10</range><constant>0.7</constant></attenuation>
+    </light>
+
+    <!-- ================= Ground Plane ================= -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>20 20</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.0</mu>
+                <mu2>1.0</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>20 20</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.75 0.75 0.76 1</ambient>
+            <diffuse>0.75 0.75 0.76 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ================= Outer Boundary Walls (10m x 10m enclosure) ================= -->
+    <!-- Reddish-brown wood / mahogany appearance matching Figure 3 -->
+    <model name="outer_walls">
+      <static>true</static>
+
+      <!-- North Wall (solid 10m) -->
+      <link name="wall_north">
+        <pose>0 5.0 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>10.15 0.15 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>10.15 0.15 1.2</size></box></geometry>
+          <material>
+            <ambient>0.45 0.22 0.18 1</ambient>
+            <diffuse>0.50 0.25 0.20 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- East Wall (solid 10m) -->
+      <link name="wall_east">
+        <pose>5.0 0 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>0.15 10.15 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>0.15 10.15 1.2</size></box></geometry>
+          <material>
+            <ambient>0.45 0.22 0.18 1</ambient>
+            <diffuse>0.50 0.25 0.20 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- West Wall (solid 10m) -->
+      <link name="wall_west">
+        <pose>-5.0 0 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>0.15 10.15 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>0.15 10.15 1.2</size></box></geometry>
+          <material>
+            <ambient>0.45 0.22 0.18 1</ambient>
+            <diffuse>0.50 0.25 0.20 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- South Wall with doorway opening at bottom-left (from x = -5.0 to -3.5) -->
+      <link name="wall_south">
+        <pose>0.75 -5.0 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>8.5 0.15 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>8.5 0.15 1.2</size></box></geometry>
+          <material>
+            <ambient>0.45 0.22 0.18 1</ambient>
+            <diffuse>0.50 0.25 0.20 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ================= Interior Partition Walls ================= -->
+    <!-- Light warm wood / oak appearance matching Figure 3 -->
+    <model name="interior_walls">
+      <static>true</static>
+
+      <!-- ================= 1. Top-Left Partition ================= -->
+      <!-- Horizontal wall 1 extending from West wall to x = -2.0 -->
+      <link name="wall_tl_horizontal_1">
+        <pose>-3.5 1.75 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>3.0 0.15 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>3.0 0.15 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- Vertical wall step going north from y = 1.75 to y = 4.2 at x = -2.0 -->
+      <link name="wall_tl_vertical">
+        <pose>-2.0 2.975 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>0.15 2.45 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>0.15 2.45 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- Horizontal wall 2 extending east from x = -2.0 to x = 0.75 at y = 2.4 -->
+      <link name="wall_tl_horizontal_2">
+        <pose>-0.625 2.4 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>2.75 0.15 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>2.75 0.15 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- ================= 2. Mid-Left Partition ================= -->
+      <!-- Horizontal wall extending from West wall to x = -2.0 at y = -1.6 -->
+      <link name="wall_ml_horizontal">
+        <pose>-3.5 -1.6 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>3.0 0.15 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>3.0 0.15 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- Vertical stub going north from y = -1.6 to y = 0.0 at x = -2.0 -->
+      <link name="wall_ml_vertical_stub">
+        <pose>-2.0 -0.8 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>0.15 1.6 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>0.15 1.6 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- ================= 3. Bottom-Center / South Partition ================= -->
+      <!-- Vertical wall extending north from South wall (y = -5.0) to y = -1.6 at x = 0.0 -->
+      <link name="wall_bc_vertical">
+        <pose>0.0 -3.3 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>0.15 3.4 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>0.15 3.4 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- Horizontal wall turning east from x = 0.0 to x = 2.75 at y = -1.6 -->
+      <link name="wall_bc_horizontal">
+        <pose>1.375 -1.6 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>2.75 0.15 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>2.75 0.15 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- Vertical wall going north from y = -1.6 to y = 0.0 at x = 1.5 -->
+      <link name="wall_br_vertical">
+        <pose>1.5 -0.8 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>0.15 1.6 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>0.15 1.6 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- Horizontal stub on far east wall from x = 4.0 to 5.0 at y = -1.6 -->
+      <link name="wall_br_stub">
+        <pose>4.5 -1.6 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>1.0 0.15 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>1.0 0.15 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- ================= 4. Top-Right Partition ================= -->
+      <!-- Vertical wall extending south from North wall (y = 5.0) to y = 1.0 at x = 1.5 -->
+      <link name="wall_tr_vertical">
+        <pose>1.5 3.0 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>0.15 4.0 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>0.15 4.0 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- Horizontal wall branching east from x = 1.5 to x = 4.25 at y = 2.75 -->
+      <link name="wall_tr_horizontal">
+        <pose>2.875 2.75 0.6 0 0 0</pose>
+        <collision name="col">
+          <geometry><box><size>2.75 0.15 1.2</size></box></geometry>
+        </collision>
+        <visual name="vis">
+          <geometry><box><size>2.75 0.15 1.2</size></box></geometry>
+          <material>
+            <ambient>0.82 0.52 0.22 1</ambient>
+            <diffuse>0.88 0.58 0.25 1</diffuse>
+            <specular>0.15 0.15 0.15 1</specular>
+          </material>
+        </visual>
+      </link>
+
+    </model>
+
+  </world>
+</sdf>

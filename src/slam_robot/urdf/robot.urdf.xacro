@@ -1,0 +1,277 @@
+<?xml version="1.0"?>
+<robot name="slam_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ================= Properties ================= -->
+  <xacro:property name="body_len"  value="0.40"/>
+  <xacro:property name="body_wid"  value="0.25"/>
+  <xacro:property name="body_hgt"  value="0.10"/>
+  <xacro:property name="body_mass" value="4.0"/>
+
+  <xacro:property name="wheel_radius" value="0.05"/>
+  <xacro:property name="wheel_width"  value="0.04"/>
+  <xacro:property name="wheel_mass"   value="0.78"/>
+
+  <xacro:property name="caster_radius" value="0.025"/>
+  <xacro:property name="caster_mass"   value="0.15"/>
+
+  <xacro:property name="lidar_mass" value="0.20"/>
+  <xacro:property name="imu_mass"   value="0.05"/>
+
+  <xacro:property name="wheel_separation" value="${body_wid + wheel_width}"/>
+
+  <!-- ================= Base ================= -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_len} ${body_wid} ${body_hgt}"/>
+      </geometry>
+      <material name="dark_grey">
+        <color rgba="0.3 0.3 0.3 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${body_len} ${body_wid} ${body_hgt}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${body_mass}"/>
+      <inertia ixx="0.024167" ixy="0.0" ixz="0.0"
+               iyy="0.056667" iyz="0.0"
+               izz="0.074167"/>
+    </inertial>
+  </link>
+
+  <!-- ================= Drive wheels (Center Axle, True Diff Drive) ================= -->
+  <xacro:macro name="drive_wheel" params="prefix y">
+    <link name="${prefix}_wheel">
+      <visual>
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0.05 0.05 0.05 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <mass value="${wheel_mass}"/>
+        <inertia ixx="0.000340" ixy="0.0" ixz="0.0"
+                 iyy="0.000610" iyz="0.0"
+                 izz="0.000610"/>
+      </inertial>
+    </link>
+    <joint name="${prefix}_wheel_joint" type="revolute">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="0.0 ${y} -${wheel_radius}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-1e+16" upper="1e+16" effort="30" velocity="10"/>
+      <dynamics damping="0.01" friction="0.02"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:drive_wheel prefix="left"  y="${body_wid / 2 + wheel_width / 2}"/>
+  <xacro:drive_wheel prefix="right" y="${-body_wid / 2 - wheel_width / 2}"/>
+
+  <!-- ================= Dual Support Casters (Front + Rear = 4 Contact Points, Zero Tilt) ================= -->
+  <xacro:macro name="caster" params="prefix x">
+    <link name="${prefix}_caster_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <sphere radius="${caster_radius}"/>
+        </geometry>
+        <material name="grey">
+          <color rgba="0.55 0.55 0.55 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <sphere radius="${caster_radius}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="${caster_mass}"/>
+        <inertia ixx="0.000019" ixy="0.0" ixz="0.0"
+                 iyy="0.000019" iyz="0.0"
+                 izz="0.000019"/>
+      </inertial>
+    </link>
+    <joint name="${prefix}_caster_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}_caster_link"/>
+      <origin xyz="${x} 0 ${caster_radius - (2 * wheel_radius)}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:caster prefix="front" x="0.16"/>
+  <xacro:caster prefix="rear"  x="-0.16"/>
+
+  <!-- ================= Lidar ================= -->
+  <link name="lidar_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.05"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.2 0.4 0.8 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${lidar_mass}"/>
+      <inertia ixx="0.000175" ixy="0.0" ixz="0.0"
+               iyy="0.000175" iyz="0.0"
+               izz="0.000160"/>
+    </inertial>
+  </link>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0.10 0 ${body_hgt / 2 + 0.025}" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="lidar_link">
+    <sensor name="gpu_lidar" type="gpu_lidar">
+      <pose relative_to="lidar_link">0 0 0 0 0 0</pose>
+      <topic>/scan</topic>
+      <update_rate>10</update_rate>
+      <gz_frame_id>lidar_link</gz_frame_id>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.12</min>
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </lidar>
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+    </sensor>
+  </gazebo>
+
+  <!-- ================= IMU ================= -->
+  <link name="imu_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.03 0.015"/>
+      </geometry>
+      <material name="green">
+        <color rgba="0.2 0.8 0.3 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${imu_mass}"/>
+      <inertia ixx="0.0000071" ixy="0.0" ixz="0.0"
+               iyy="0.0000071" iyz="0.0"
+               izz="0.0000071"/>
+    </inertial>
+  </link>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="-0.12 0 ${body_hgt / 2 + 0.0075}" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <pose relative_to="imu_link">0 0 0 0 0 0</pose>
+      <topic>/imu</topic>
+      <update_rate>50</update_rate>
+      <gz_frame_id>imu_link</gz_frame_id>
+      <always_on>true</always_on>
+    </sensor>
+  </gazebo>
+
+  <!-- ================= Collision coloring & Friction ================= -->
+  <gazebo reference="base_link">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="left_wheel">
+    <material>Gazebo/Black</material>
+    <mu1>1.5</mu1>
+    <mu2>1.5</mu2>
+  </gazebo>
+  <gazebo reference="right_wheel">
+    <material>Gazebo/Black</material>
+    <mu1>1.5</mu1>
+    <mu2>1.5</mu2>
+  </gazebo>
+  <gazebo reference="front_caster_link">
+    <material>Gazebo/Grey</material>
+    <mu1>0.0001</mu1>
+    <mu2>0.0001</mu2>
+  </gazebo>
+  <gazebo reference="rear_caster_link">
+    <material>Gazebo/Grey</material>
+    <mu1>0.0001</mu1>
+    <mu2>0.0001</mu2>
+  </gazebo>
+
+  <!-- ================= Gazebo plugins ================= -->
+  <gazebo>
+    <plugin filename="ignition-gazebo-diff-drive-system" name="ignition::gazebo::systems::DiffDrive">
+      <topic>/cmd_vel</topic>
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>${wheel_separation}</wheel_separation>
+      <wheel_radius>${wheel_radius}</wheel_radius>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <odom_topic>odom</odom_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+      <max_linear_acceleration>0.5</max_linear_acceleration>
+      <max_angular_acceleration>0.8</max_angular_acceleration>
+      <odom_only_twist>true</odom_only_twist>
+      <tf_topic>/tf</tf_topic>
+      <publish_tf>true</publish_tf>
+      <update_rate>50</update_rate>
+      <min_linear_velocity>-0.4</min_linear_velocity>
+      <max_linear_velocity>0.4</max_linear_velocity>
+      <min_angular_velocity>-1.0</min_angular_velocity>
+      <max_angular_velocity>1.0</max_angular_velocity>
+    </plugin>
+
+    <plugin filename="ignition-gazebo-joint-state-publisher-system" name="ignition::gazebo::systems::JointStatePublisher">
+      <joint_name>left_wheel_joint</joint_name>
+      <joint_name>right_wheel_joint</joint_name>
+      <topic>/joint_states</topic>
+      <update_rate>50</update_rate>
+    </plugin>
+  </gazebo>
+
+</robot>

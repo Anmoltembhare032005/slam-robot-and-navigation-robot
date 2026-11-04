@@ -1,0 +1,30 @@
+# ROS 2 Build, Install and Log Artifacts
+build/
+install/
+log/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Editor & IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.directory
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.backup
+*.bak
+
+# FastRTPS / DDS shared memory & temporary files
+fastrtps_*
+sem.fastrtps_*
