@@ -15,4 +15,7 @@ python3 -c "from PIL import Image; Image.open('/home/anmol/slam_ws/src/slam_robo
 
 sed -i 's/slam_map.png/slam_map.pgm/g' /home/anmol/slam_ws/src/slam_robot/maps/slam_map.yaml 2>/dev/null || true
 
+echo "Updating install directory for Nav2..."
+(cd /home/anmol/slam_ws && colcon build --symlink-install --packages-select slam_robot)
+
 echo "✅ Map saved successfully in ~/slam_ws/src/slam_robot/maps/ !"
